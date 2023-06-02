@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <glib.h>
 #include <glib-unix.h>
+#include <sys/time.h>
 #include <sys/uio.h>
 #include <string.h>
 
@@ -138,9 +139,11 @@ extern gboolean use_syslog;
 #define ndebugf(fmt, ...) \
 	if (log_level >= DEBUG_LEVEL) { \
 		do { \
+			struct timeval tv; \
+			gettimeofday(&tv, NULL); \
 			fprintf(stderr, "[conmon:d]: " fmt "\n", ##__VA_ARGS__); \
 			if (use_syslog) \
-				syslog(LOG_INFO, "conmon %.20s <ndebug>: " fmt " \n", log_cid, ##__VA_ARGS__); \
+				syslog(LOG_INFO, "conmon %.20s <ndebug>: %ld.%ld " fmt " \n", log_cid, tv.tv_sec, tv.tv_usec, ##__VA_ARGS__); \
 		} while (0); \
 	}
 

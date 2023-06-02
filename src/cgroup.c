@@ -273,6 +273,8 @@ gboolean check_cgroup2_oom()
 	if (!is_cgroup_v2)
 		return G_SOURCE_REMOVE;
 
+	ndebugf("in check_cgroup2_oom, last_counter=%ld", last_counter);
+
 	_cleanup_free_ char *memory_events_file_path = g_build_filename(cgroup2_path, "memory.events", NULL);
 
 	_cleanup_fclose_ FILE *fp = fopen(memory_events_file_path, "re");
@@ -286,12 +288,10 @@ gboolean check_cgroup2_oom()
 	ssize_t read;
 	while ((read = getline(&line, &len, fp)) != -1) {
 		long int counter;
-		const int oom_len = 4, oom_kill_len = 9;
+		const int oom_kill_len = 9;
 
 		if (read >= oom_kill_len + 2 && memcmp(line, "oom_kill ", oom_kill_len) == 0)
 			len = oom_kill_len;
-		else if (read >= oom_len + 2 && memcmp(line, "oom ", oom_len) == 0)
-			len = oom_len;
 		else
 			continue;
 
@@ -304,6 +304,8 @@ gboolean check_cgroup2_oom()
 
 		if (counter == 0)
 			continue;
+
+		ndebugf("  got %s (%ld)", line, counter);
 
 		if (counter != last_counter) {
 			if (write_oom_files() == 0)
