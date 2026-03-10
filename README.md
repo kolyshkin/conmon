@@ -64,6 +64,7 @@ sudo apt-get install \
   libc6-dev \
   libglib2.0-dev \
   libseccomp-dev \
+  libsystemd-dev \
   pkg-config \
   make \
   runc
